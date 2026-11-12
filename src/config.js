@@ -22,12 +22,14 @@ export const PALETTE = {
 // Graphics quality. The game picks a tier for the device when it starts and
 // steps down by itself if the frame rate stays low (see Game.watchPerformance).
 //   pixelRatio  - sharpness cap (1 = one drawn pixel per CSS pixel)
+//   maxPixels   - hard ceiling on pixels drawn per frame, whatever the window
+//                 size (a big window on a sharp screen is the usual cause of lag)
 //   samples     - edge smoothing (anti-aliasing) samples
 //   shadows     - shadow map size, 0 = no real-time shadows
 export const QUALITY = {
-  high: { pixelRatio: 1.5, samples: 4, bloom: true, shadows: 4096, partyLights: true, beams: 6, dancers: 12 },
-  medium: { pixelRatio: 1.25, samples: 2, bloom: true, shadows: 2048, partyLights: true, beams: 6, dancers: 10 },
-  low: { pixelRatio: 1, samples: 0, bloom: false, shadows: 0, partyLights: false, beams: 3, dancers: 6 },
+  high: { pixelRatio: 1.5, maxPixels: 2.3e6, samples: 4, bloom: true, shadows: 2048, partyLights: true, beams: 6, dancers: 12 },
+  medium: { pixelRatio: 1.25, maxPixels: 1.4e6, samples: 2, bloom: true, shadows: 1024, partyLights: true, beams: 6, dancers: 10 },
+  low: { pixelRatio: 1, maxPixels: 0.9e6, samples: 0, bloom: false, shadows: 0, partyLights: false, beams: 3, dancers: 6 },
 };
 export const QUALITY_ORDER = ['high', 'medium', 'low'];
 

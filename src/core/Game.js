@@ -178,6 +178,7 @@ export class Game {
       if (e.code === 'Enter' && this.state === 'dead' && this.deadT > 0.9) go();
       if (e.code === 'KeyM') this.audio.toggleMusic();
       if (e.code === 'KeyV') this.toggleView();
+      if (e.code === 'KeyQ') this.cycleQuality();
     });
     document.addEventListener('visibilitychange', () => {
       if (document.hidden && this.state === 'playing') this.input.unlock();
@@ -208,22 +209,33 @@ export class Game {
     const q = QUALITY[this.tier];
     this.party.setQuality(q);
     this.dancers.max = q.dancers;
+    document.getElementById('hint-quality').textContent = `Graphics: ${this.tier}`;
     this.effects.muzzleLight.visible = q.partyLights;
   }
 
-  // Keeps the game smooth on weak devices. Every 2.5 s of play it looks at
-  // the real frame rate; if that is under 44 fps it drops one graphics tier,
-  // and once on the lowest tier it starts lowering the resolution instead.
-  // It only ever steps down, so the picture never flickers between settings.
+  // Q: change graphics quality by hand (high -> medium -> low -> high).
+  cycleQuality() {
+    this.tier = QUALITY_ORDER[(QUALITY_ORDER.indexOf(this.tier) + 1) % QUALITY_ORDER.length];
+    this.renderer.resScale = 1;
+    this.renderer.setQuality(this.tier);
+    this.applyQuality();
+    this.perfHold = 1;
+    this.hud.banner(`GRAPHICS: ${this.tier.toUpperCase()}`);
+  }
+
+  // Keeps the game smooth. Every 1.5 s of play it looks at the real frame
+  // rate; if that is under 50 fps it drops one graphics tier, and once on the
+  // lowest tier it starts lowering the resolution instead. It only ever steps
+  // down by itself, so the picture never flickers between settings.
   watchPerformance(dt) {
     if (this.state !== 'playing' || dt > 0.25 || document.hidden) { this.perfT = 0; this.perfN = 0; return; }
     this.perfT += dt;
     this.perfN++;
-    if (this.perfT < 2.5) return;
+    if (this.perfT < 1.5) return;
     const fps = this.perfN / this.perfT;
     this.perfT = 0;
     this.perfN = 0;
-    if (this.perfHold-- > 0 || fps >= 44) return; // skip the first window after any change
+    if (this.perfHold-- > 0 || fps >= 50) return; // skip the first window after any change
     this.perfHold = 1;
     const i = QUALITY_ORDER.indexOf(this.tier);
     if (i < QUALITY_ORDER.length - 1) {

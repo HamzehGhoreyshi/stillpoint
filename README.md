@@ -61,6 +61,7 @@ Then open http://localhost:5173 in Chrome or Safari and click to begin.
 | Space | Jump |
 | Shift | Slow walk (slow time) |
 | V | Switch third / first person |
+| Q | Graphics quality (high / medium / low) |
 | M | Music on / off |
 | Esc | Pause |
 
@@ -109,14 +110,14 @@ the whole building draws in about 14 commands instead of 250.
 
 | Tier | Used for | Resolution cap | Shadows | Glow (bloom) | Edge smoothing |
 |---|---|---|---|---|---|
-| high | desktop | 1.5x | 4096 map | on | 4x |
-| medium | phones | 1.25x | 2048 map | on | 2x |
-| low | phones with ≤4 GB memory or ≤4 cores | 1x | off (soft contact shadows stay) | off | off |
+| high | desktop | 1.5x, max 2.3 MP | 2048 map | on | 4x |
+| medium | phones | 1.25x, max 1.4 MP | 1024 map | on | 2x |
+| low | phones with ≤4 GB memory or ≤4 cores | 1x, max 0.9 MP | off (soft contact shadows stay) | off | off |
 
 While you play, `Game.watchPerformance()` checks the real frame rate every
-2.5 seconds. Under 44 fps it drops one tier; on the lowest tier it lowers the
-resolution instead. Add `?quality=low` (or `medium`, `high`) to the address to
-force a tier.
+1.5 seconds. Under 50 fps it drops one tier; on the lowest tier it lowers the
+resolution instead. Press `Q` to change tier by hand, or add `?quality=low`
+(or `medium`, `high`) to the address to force one.
 
 ## Re-filming the demo
 

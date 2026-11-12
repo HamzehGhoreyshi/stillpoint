@@ -166,8 +166,12 @@ export class Renderer {
   resize() {
     const w = innerWidth, h = innerHeight;
     // ?pr=3 lifts the sharpness cap; the recorder uses it to film in 4K
-    const cap = Number(new URLSearchParams(location.search).get('pr')) || this.quality.pixelRatio;
-    const pr = Math.min(devicePixelRatio || 1, cap) * this.resScale;
+    // sharpness: the screen's own ratio, the tier's cap, and a ceiling on
+    // total pixels - whichever is lowest. (?pr= overrides all, for filming.)
+    const forced = Number(new URLSearchParams(location.search).get('pr'));
+    const q = this.quality;
+    const fit = Math.sqrt(q.maxPixels / Math.max(w * h, 1));
+    const pr = forced || Math.min(devicePixelRatio || 1, q.pixelRatio, fit) * this.resScale;
     this.renderer.setPixelRatio(pr);
     this.renderer.setSize(w, h, false);
     this.composer.setPixelRatio(pr);
