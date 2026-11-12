@@ -12,7 +12,7 @@ Project summary lives in: `~/Desktop/AI/ai-os/10_context/projects/mini-game.md`
 - What it is: STILLPOINT — a browser first-person shooter where time only moves when the player moves; kills bring dancers onto a party dance floor. Experiment.
 - Tech stack: Three.js + Vite, plain JavaScript modules. No asset files: geometry, textures, sound and music are generated in code.
 - How to run it: `npm install`, then `npm run dev` → http://localhost:5173 (use Chrome/Safari so the mouse can be captured). Add `?nolock` to play without mouse capture.
-- How to deploy it: `vercel deploy --prod --yes` (Vercel project `stillpoint`, live at https://stillpoint-gray.vercel.app). Pushing to GitHub does not deploy by itself.
+- How to deploy it: push to `main` — the GitHub repo is connected to the Vercel project `stillpoint`, so every push deploys to https://stillpoint-gray.vercel.app. (`vercel deploy --prod --yes` still works for a manual deploy.)
 - Repo: https://github.com/HamzehGhoreyshi/stillpoint (public).
 - Demo media: `node tools/record.mjs` re-films `docs/demo.mp4` and the stills (see README).
 - Rules specific to this project:
