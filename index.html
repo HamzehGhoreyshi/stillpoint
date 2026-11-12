@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>STILLPOINT</title>
+    <link rel="icon" href="data:," />
+    <meta name="description" content="A first-person shooter where the world only moves when you do." />
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+
+    <div id="hud" class="hidden">
+      <div id="crosshair"><i></i><i></i><i></i><i></i><b></b></div>
+      <div id="hitmarker"></div>
+      <div id="damage-dir"></div>
+      <div id="scope"><i></i><i></i></div>
+
+      <div id="hint"><span><b>V</b><i id="hint-view">First person</i></span><span><b>1 2 3</b><i>Weapons</i></span><span><b>R</b><i>Reload</i></span></div>
+
+      <div id="status">
+        <span id="wave"></span>
+        <span id="kills"></span>
+        <span id="threat"></span>
+      </div>
+      <div id="banner"></div>
+      <div id="shout"></div>
+      <div id="prompt"></div>
+
+      <div id="health" aria-label="Health"></div>
+      <div id="timebar" aria-label="Time flow"><div id="timebar-fill"></div></div>
+      <div id="weapons" aria-label="Weapons"></div>
+      <div id="ammo" aria-label="Ammunition">
+        <span id="ammo-count">10</span>
+        <div id="ammo-pips"></div>
+      </div>
+    </div>
+
+    <div id="screen-start" class="screen">
+      <div class="panel">
+        <h1>STILLPOINT</h1>
+        <p class="tag">Stand still and the party waits. Move and it moves with you.</p>
+        <button id="btn-start" class="cta">Click to begin</button>
+        <button id="view-toggle" class="ghost">View: first person</button>
+        <ul class="keys">
+          <li><kbd>W A S D</kbd><span>Move</span></li>
+          <li><kbd>Mouse</kbd><span>Aim</span></li>
+          <li><kbd>Left click</kbd><span>Fire</span></li>
+          <li><kbd>Right click</kbd><span>Zoom / scope</span></li>
+          <li><kbd>1 2 3</kbd><span>Pistol · AK · Sniper</span></li>
+          <li><kbd>R</kbd><span>Reload</span></li>
+          <li><kbd>Space</kbd><span>Jump</span></li>
+          <li><kbd>Shift</kbd><span>Slow walk</span></li>
+          <li><kbd>M</kbd><span>Music on / off</span></li>
+          <li><kbd>V</kbd><span>Third / first person</span></li>
+        </ul>
+        <p class="touch-help">Left thumb moves · right thumb aims · buttons do the rest · VIEW switches camera</p>
+      </div>
+      <a class="credit" href="https://hamzeh.framer.ai/?utm_source=mini-game&utm_medium=referral" target="_blank" rel="noopener">Made by Hamzeh</a>
+    </div>
+
+    <div id="screen-pause" class="screen hidden">
+      <div class="panel">
+        <h2>Paused</h2>
+        <button id="btn-resume" class="cta">Click to resume</button>
+      </div>
+    </div>
+
+    <div id="screen-over" class="screen hidden">
+      <div class="panel">
+        <h2>You were caught</h2>
+        <p id="over-stats" class="stats"></p>
+        <p id="over-best" class="tag"></p>
+        <button id="btn-restart" class="cta">Restart</button>
+        <p class="hint">or press Enter</p>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
