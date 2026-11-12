@@ -4,8 +4,32 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>STILLPOINT</title>
-    <link rel="icon" href="data:," />
-    <meta name="description" content="A first-person shooter where the world only moves when you do." />
+    <meta name="description" content="A shooter in a disco where the world only moves when you do. Plays in your browser, on desktop and phone." />
+    <meta name="theme-color" content="#070a1c" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- installable as an app -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="STILLPOINT" />
+
+    <!-- how the link looks when shared -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="STILLPOINT" />
+    <meta property="og:title" content="STILLPOINT — the world only moves when you do" />
+    <meta property="og:description" content="A shooter in a disco. Stand still and time freezes; every kill brings a dancer onto the floor. Plays in your browser." />
+    <meta property="og:url" content="https://stillpoint-gray.vercel.app/" />
+    <meta property="og:image" content="https://stillpoint-gray.vercel.app/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A green ogre with a rifle in a neon disco, dancers behind him, under the title STILLPOINT" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="STILLPOINT — the world only moves when you do" />
+    <meta name="twitter:description" content="A shooter in a disco. Stand still and time freezes. Plays in your browser." />
+    <meta name="twitter:image" content="https://stillpoint-gray.vercel.app/og.jpg" />
   </head>
   <body>
     <canvas id="view"></canvas>
@@ -41,7 +65,11 @@
         <h1>STILLPOINT</h1>
         <p class="tag">Stand still and the party waits. Move and it moves with you.</p>
         <button id="btn-start" class="cta">Click to begin</button>
-        <button id="view-toggle" class="ghost">View: first person</button>
+        <div class="row">
+          <button id="view-toggle" class="ghost">View: first person</button>
+          <button id="btn-install" class="ghost hidden">Install game</button>
+        </div>
+        <p id="install-tip" class="tag hidden"></p>
         <ul class="keys">
           <li><kbd>W A S D</kbd><span>Move</span></li>
           <li><kbd>Mouse</kbd><span>Aim</span></li>

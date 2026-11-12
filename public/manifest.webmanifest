@@ -1,0 +1,23 @@
+{
+  "name": "STILLPOINT",
+  "short_name": "STILLPOINT",
+  "description": "A shooter in a disco where the world only moves when you do.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "background_color": "#070a1c",
+  "theme_color": "#070a1c",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "/screens/wide.jpg", "sizes": "1600x900", "type": "image/jpeg", "form_factor": "wide", "label": "Third-person view in the disco" },
+    { "src": "/screens/phone.jpg", "sizes": "780x1688", "type": "image/jpeg", "form_factor": "narrow", "label": "Phone controls" }
+  ]
+}

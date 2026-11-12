@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { CONFIG, PALETTE } from '../config.js';
+import { CONFIG, PALETTE, QUALITY, QUALITY_ORDER, pickQuality } from '../config.js';
 import { Input } from './Input.js';
 import { TimeSystem } from './TimeSystem.js';
 import { AudioSystem } from './AudioSystem.js';
@@ -40,7 +40,8 @@ const SOBS = ['WAAAH!', 'SNIFF...', 'BOO-HOO!', 'WHY?!', 'SO SORRY!', 'WAAAAH!']
 export class Game {
   constructor(canvas) {
     this.state = 'menu';
-    this.renderer = new Renderer(canvas);
+    this.tier = pickQuality();
+    this.renderer = new Renderer(canvas, this.tier);
     this.scene = this.renderer.scene;
     this.input = new Input(canvas);
     this.time = new TimeSystem();
@@ -193,8 +194,46 @@ export class Game {
     this.fitScreen();
     addEventListener('resize', () => this.fitScreen());
 
+    this.applyQuality();
+    this.perfT = 0;
+    this.perfN = 0;
+    this.perfHold = 1;
+
     this.hud.show('start');
     this.hud.setWeapon(0);
+  }
+
+  // Tells every system which graphics tier is in force.
+  applyQuality() {
+    const q = QUALITY[this.tier];
+    this.party.setQuality(q);
+    this.dancers.max = q.dancers;
+    this.effects.muzzleLight.visible = q.partyLights;
+  }
+
+  // Keeps the game smooth on weak devices. Every 2.5 s of play it looks at
+  // the real frame rate; if that is under 44 fps it drops one graphics tier,
+  // and once on the lowest tier it starts lowering the resolution instead.
+  // It only ever steps down, so the picture never flickers between settings.
+  watchPerformance(dt) {
+    if (this.state !== 'playing' || dt > 0.25 || document.hidden) { this.perfT = 0; this.perfN = 0; return; }
+    this.perfT += dt;
+    this.perfN++;
+    if (this.perfT < 2.5) return;
+    const fps = this.perfN / this.perfT;
+    this.perfT = 0;
+    this.perfN = 0;
+    if (this.perfHold-- > 0 || fps >= 44) return; // skip the first window after any change
+    this.perfHold = 1;
+    const i = QUALITY_ORDER.indexOf(this.tier);
+    if (i < QUALITY_ORDER.length - 1) {
+      this.tier = QUALITY_ORDER[i + 1];
+      this.renderer.setQuality(this.tier);
+      this.applyQuality();
+    } else if (this.renderer.resScale > 0.6) {
+      this.renderer.resScale -= 0.15;
+      this.renderer.resize();
+    }
   }
 
   // Picks touch or mouse controls, and a wider view for tall screens.
@@ -273,8 +312,10 @@ export class Game {
   start() {
     let last = performance.now();
     const frame = (now) => {
-      const dt = Math.min((now - last) / 1000, 0.05);
+      const real = (now - last) / 1000;
+      const dt = Math.min(real, 0.05);
       last = now;
+      this.watchPerformance(real);
       this.tick(dt);
       requestAnimationFrame(frame);
     };

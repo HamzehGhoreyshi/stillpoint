@@ -19,6 +19,29 @@ export const PALETTE = {
   enemyShot: 0xffa02a,
 };
 
+// Graphics quality. The game picks a tier for the device when it starts and
+// steps down by itself if the frame rate stays low (see Game.watchPerformance).
+//   pixelRatio  - sharpness cap (1 = one drawn pixel per CSS pixel)
+//   samples     - edge smoothing (anti-aliasing) samples
+//   shadows     - shadow map size, 0 = no real-time shadows
+export const QUALITY = {
+  high: { pixelRatio: 1.5, samples: 4, bloom: true, shadows: 4096, partyLights: true, beams: 6, dancers: 12 },
+  medium: { pixelRatio: 1.25, samples: 2, bloom: true, shadows: 2048, partyLights: true, beams: 6, dancers: 10 },
+  low: { pixelRatio: 1, samples: 0, bloom: false, shadows: 0, partyLights: false, beams: 3, dancers: 6 },
+};
+export const QUALITY_ORDER = ['high', 'medium', 'low'];
+
+// Desktop starts high. Phones start medium, or low when they report little
+// memory or few processor cores. ?quality=low (etc.) forces a tier.
+export function pickQuality() {
+  const forced = new URLSearchParams(location.search).get('quality');
+  if (forced in QUALITY) return forced;
+  if (!matchMedia('(pointer: coarse)').matches) return 'high';
+  const memory = navigator.deviceMemory || 8; // iPhones do not report it
+  const cores = navigator.hardwareConcurrency || 4;
+  return memory <= 4 || cores <= 4 ? 'low' : 'medium';
+}
+
 export const CONFIG = {
   arena: { half: 22, wallHeight: 8 },
 

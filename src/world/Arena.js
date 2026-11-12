@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CONFIG, PALETTE } from '../config.js';
 import { CollisionWorld } from './Collision.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { tileTexture, panelTexture, spillTexture } from './textures.js';
 
 // Environment generation. Everything is built from scaled boxes, and every
@@ -15,6 +16,7 @@ export class Arena {
     scene.add(this.group);
     this.collision = new CollisionWorld();
     this.spawnPoints = [];
+    this.contacts = []; // contact shadows, collected and built as one mesh
     this.half = CONFIG.arena.half;
 
     const panel = panelTexture();
@@ -39,11 +41,38 @@ export class Arena {
     this.buildStage();
     this.buildRoof();
 
-    // The arena never moves: freeze its transforms so Three.js skips them.
+    this.buildContacts();
+    this.mergeStatic();
+  }
+
+  // The arena is built from ~250 separate boxes, which would mean ~250
+  // separate draw commands every frame (and again for shadows) - the main
+  // cost on a weak phone. Nothing here ever moves, so all pieces that share a
+  // material are fused into one mesh: the whole building draws in about ten.
+  mergeStatic() {
+    this.group.updateMatrixWorld(true);
+    const buckets = new Map();
+    const pieces = [];
     this.group.traverse((o) => {
-      o.updateMatrix();
-      o.matrixAutoUpdate = false;
+      if (!o.isMesh) return;
+      const key = `${o.material.uuid}|${o.castShadow}|${o.receiveShadow}|${o.renderOrder}`;
+      let b = buckets.get(key);
+      if (!b) buckets.set(key, (b = { mesh: o, geos: [] }));
+      const g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
+      b.geos.push(g.applyMatrix4(o.matrixWorld)); // bake its place into the shape
+      pieces.push(o);
     });
+    for (const o of pieces) o.removeFromParent();
+    this.group.clear();
+    for (const { mesh, geos } of buckets.values()) {
+      const merged = new THREE.Mesh(mergeGeometries(geos), mesh.material);
+      merged.castShadow = mesh.castShadow;
+      merged.receiveShadow = mesh.receiveShadow;
+      merged.renderOrder = mesh.renderOrder;
+      merged.matrixAutoUpdate = false;
+      this.group.add(merged);
+      for (const g of geos) g.dispose();
+    }
     this.group.updateMatrixWorld(true);
   }
 
@@ -63,33 +92,49 @@ export class Arena {
 
   // Fake ambient occlusion: a dark, soft-edged patch under an object.
   contact(cx, y, cz, sx, sz, strength = 0.5) {
+    this.contacts.push({ cx, y, cz, sx, sz, strength });
+  }
+
+  // All contact shadows share one material; each quad carries its own box
+  // size as per-corner data, so they can be drawn together in one go.
+  buildContacts() {
     const pad = 0.8;
-    const geo = new THREE.PlaneGeometry(sx + pad * 2, sz + pad * 2);
-    geo.rotateX(-Math.PI / 2);
+    const geos = this.contacts.map(({ cx, y, cz, sx, sz, strength }) => {
+      const g = new THREE.PlaneGeometry(sx + pad * 2, sz + pad * 2).toNonIndexed();
+      g.rotateX(-Math.PI / 2);
+      const n = g.attributes.position.count;
+      const local = new Float32Array(n * 2), box = new Float32Array(n * 3);
+      for (let i = 0; i < n; i++) {
+        local[i * 2] = g.attributes.position.getX(i);
+        local[i * 2 + 1] = g.attributes.position.getZ(i);
+        box[i * 3] = sx / 2; box[i * 3 + 1] = sz / 2; box[i * 3 + 2] = strength;
+      }
+      g.setAttribute('aLocal', new THREE.BufferAttribute(local, 2));
+      g.setAttribute('aBox', new THREE.BufferAttribute(box, 3));
+      g.translate(cx, y + 0.012, cz);
+      return g;
+    });
     const mat = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
-      uniforms: {
-        uHalf: { value: new THREE.Vector2(sx / 2, sz / 2) },
-        uPad: { value: pad },
-        uStrength: { value: strength },
-      },
+      uniforms: { uPad: { value: pad } },
       vertexShader: /* glsl */ `
-        varying vec2 vP;
-        void main() { vP = position.xz; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+        attribute vec2 aLocal; attribute vec3 aBox;
+        varying vec2 vP; varying vec3 vBox;
+        void main() { vP = aLocal; vBox = aBox; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
       fragmentShader: /* glsl */ `
-        uniform vec2 uHalf; uniform float uPad; uniform float uStrength;
-        varying vec2 vP;
+        uniform float uPad;
+        varying vec2 vP; varying vec3 vBox;
         void main() {
-          float d = length(max(abs(vP) - uHalf, 0.0));
+          float d = length(max(abs(vP) - vBox.xy, 0.0));
           float a = 1.0 - smoothstep(0.0, uPad, d);
-          gl_FragColor = vec4(0.012, 0.02, 0.06, a * a * uStrength);
+          gl_FragColor = vec4(0.012, 0.02, 0.06, a * a * vBox.z);
         }`,
     });
-    const m = new THREE.Mesh(geo, mat);
-    m.position.set(cx, y + 0.012, cz);
+    const m = new THREE.Mesh(mergeGeometries(geos), mat);
     m.renderOrder = 1;
     this.group.add(m);
+    for (const g of geos) g.dispose();
   }
 
   // The club ceiling: a dark slab with a lighting truss hung under it.

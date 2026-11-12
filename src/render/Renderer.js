@@ -5,7 +5,7 @@ import { Pass } from 'three/addons/postprocessing/Pass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { PALETTE } from '../config.js';
+import { PALETTE, QUALITY } from '../config.js';
 import { createSky } from '../world/Sky.js';
 
 // Draws the weapon on top of the world with its own camera, so the gun never
@@ -65,8 +65,9 @@ const GradeShader = {
 };
 
 export class Renderer {
-  constructor(canvas) {
-    this.lite = matchMedia('(pointer: coarse)').matches; // phone / tablet
+  constructor(canvas, tier = 'high') {
+    this.quality = QUALITY[tier];
+    this.resScale = 1; // extra resolution cut used when even the low tier is slow
     const r = (this.renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' }));
     r.shadowMap.enabled = true;
     r.shadowMap.type = THREE.PCFShadowMap;
@@ -84,7 +85,8 @@ export class Renderer {
 
     this.setupLights();
 
-    const target = new THREE.WebGLRenderTarget(2, 2, { type: THREE.HalfFloatType, samples: 4 });
+    this.samples = this.quality.samples;
+    const target = new THREE.WebGLRenderTarget(2, 2, { type: THREE.HalfFloatType, samples: this.samples });
     this.composer = new EffectComposer(r, target);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
     this.weaponPass = new OverlayPass(this.weaponScene, this.weaponCamera);
@@ -95,6 +97,7 @@ export class Renderer {
     this.composer.addPass(this.grade);
     this.composer.addPass(new OutputPass());
 
+    this.bloom.enabled = this.quality.bloom;
     this.resize();
     addEventListener('resize', () => this.resize());
   }
@@ -105,8 +108,9 @@ export class Renderer {
     this.moonDir = moonDir;
     const moon = new THREE.DirectionalLight(PALETTE.moon, 3.4);
     moon.position.copy(moonDir).multiplyScalar(70);
-    moon.castShadow = true;
-    const mapSize = this.lite ? 2048 : 4096;
+    this.moon = moon;
+    moon.castShadow = this.quality.shadows > 0;
+    const mapSize = this.quality.shadows || 1024;
     moon.shadow.mapSize.set(mapSize, mapSize);
     const sc = moon.shadow.camera;
     sc.left = -34; sc.right = 34; sc.top = 34; sc.bottom = -34; sc.near = 10; sc.far = 140;
@@ -140,9 +144,30 @@ export class Renderer {
     this.weaponScene.add(new THREE.HemisphereLight(0x8fa6ee, 0x232042, 1.3));
   }
 
+  // Switches graphics tier while the game runs.
+  setQuality(tier) {
+    const q = (this.quality = QUALITY[tier]);
+    this.bloom.enabled = q.bloom;
+    // shadows: off, or a different map size (the old map is thrown away)
+    this.moon.castShadow = q.shadows > 0;
+    if (q.shadows > 0 && this.moon.shadow.mapSize.x !== q.shadows) {
+      this.moon.shadow.mapSize.set(q.shadows, q.shadows);
+      this.moon.shadow.map?.dispose();
+      this.moon.shadow.map = null;
+    }
+    // edge smoothing lives in the render target, so that is rebuilt
+    if (q.samples !== this.samples) {
+      this.samples = q.samples;
+      this.composer.reset(new THREE.WebGLRenderTarget(2, 2, { type: THREE.HalfFloatType, samples: q.samples }));
+    }
+    this.resize();
+  }
+
   resize() {
     const w = innerWidth, h = innerHeight;
-    const pr = Math.min(devicePixelRatio || 1, this.lite ? 1.25 : 1.5);
+    // ?pr=3 lifts the sharpness cap; the recorder uses it to film in 4K
+    const cap = Number(new URLSearchParams(location.search).get('pr')) || this.quality.pixelRatio;
+    const pr = Math.min(devicePixelRatio || 1, cap) * this.resScale;
     this.renderer.setPixelRatio(pr);
     this.renderer.setSize(w, h, false);
     this.composer.setPixelRatio(pr);

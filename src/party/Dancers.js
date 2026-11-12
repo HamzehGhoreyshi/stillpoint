@@ -191,6 +191,7 @@ export class DanceCrew {
     this.scene = scene;
     this.collision = collision;
     this.list = [];
+    this.max = MAX; // lowered on weak devices
     this.count = 0;
     this.onArrive = null; // (x, y, z, color) => void
   }
@@ -214,7 +215,7 @@ export class DanceCrew {
     this.list.push(d);
     // keep the crowd to a sensible size: the earliest guest heads off
     const guests = this.list.filter((o) => !o.resident && !o.leaving);
-    if (guests.length > MAX) guests[0].leaving = 0.001;
+    if (guests.length > this.max) guests[0].leaving = 0.001;
   }
 
   update(dt, beat) {

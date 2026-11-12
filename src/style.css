@@ -257,3 +257,8 @@ body.touch #scope i:nth-child(2) { left: calc(50% - 44vmin); width: 88vmin; }
 body.touch #hint { display: none; }
 
 #threat { color: #35d6ff; }
+
+/* ---------- Install ---------- */
+.row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: -8px; }
+.row .ghost { margin-top: 0; }
+#install-tip { font-size: 11px; margin-top: -8px; color: var(--accent); opacity: 0.85; }

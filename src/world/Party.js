@@ -21,6 +21,7 @@ export class Party {
     this.scene = scene;
     this.arena = arena;
     this.t = 0;
+    this.beamCount = 6;
     this.buildFloor();
     this.buildBeams();
     this.buildMirrorBall();
@@ -152,6 +153,13 @@ export class Party {
     });
   }
 
+  // Fewer beams and no coloured room lights on weak devices.
+  setQuality(q) {
+    this.lights.forEach((l) => (l.visible = q.partyLights));
+    this.beams.forEach((b, i) => { b.cone.visible = b.pool.visible = i < q.beams; });
+    this.beamCount = q.beams;
+  }
+
   // beat = beats since the music started (fractional)
   update(dt, beat) {
     this.t += dt;
@@ -181,6 +189,7 @@ export class Party {
 
     // beams sweep in slow figure-eights and land on the floor
     for (const b of this.beams) {
+      if (b.n >= this.beamCount) continue;
       const ph = b.n * 1.7;
       const ax = Math.sin(t * 0.55 + ph) * 0.55 - Math.sign(b.z) * 0.35;
       const az = Math.cos(t * 0.4 + ph * 1.3) * 0.55 + Math.sign(b.x) * 0.35;

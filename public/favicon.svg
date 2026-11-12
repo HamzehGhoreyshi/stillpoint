@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b2260"/>
+      <stop offset="1" stop-color="#070a1c"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- horns -->
+  <polygon points="21,19 16,4 28,15" fill="#efe8da"/>
+  <polygon points="43,19 48,4 36,15" fill="#d4ccba"/>
+  <!-- ears -->
+  <polygon points="14,29 2,23 15,38" fill="#5a9a22"/>
+  <polygon points="50,29 62,23 49,38" fill="#467d18"/>
+  <!-- head, in three facets -->
+  <polygon points="32,12 46,17 52,30 48,45 40,55 24,55 16,45 12,30 18,17" fill="#7cc233"/>
+  <polygon points="32,12 46,17 52,30 48,45 40,55 32,55" fill="#5fa326"/>
+  <polygon points="32,12 18,17 23,25 41,25 46,17" fill="#9ada4a"/>
+  <!-- brow and jaw -->
+  <polygon points="16,26 48,26 46,33 18,33" fill="#356b10"/>
+  <polygon points="21,46 43,46 40,55 24,55" fill="#4f8f1e"/>
+  <!-- tusks -->
+  <polygon points="23,47 25.5,39 28,47" fill="#efe8da"/>
+  <polygon points="36,47 38.5,39 41,47" fill="#efe8da"/>
+  <!-- one tear -->
+  <path d="M43.5 34.5 q3.6 5.6 0 7.8 q-3.6 -2.2 0 -7.8z" fill="#3fe8d2"/>
+</svg>
