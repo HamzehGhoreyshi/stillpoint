@@ -138,10 +138,14 @@ h2 { font-size: clamp(24px, 4.5vw, 44px); font-weight: 200; letter-spacing: 0.4e
 
 .credit {
   position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
-  font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase;
-  color: var(--ivory); opacity: 0.45; text-decoration: none; transition: opacity 0.2s;
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 14px;
+  width: max-content; max-width: calc(100% - 32px);
+  font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ivory);
 }
-.credit:hover { opacity: 1; color: var(--accent); }
+.credit a { color: inherit; opacity: 0.45; text-decoration: none; transition: opacity 0.2s, color 0.2s; }
+.credit a:hover { opacity: 1; color: var(--accent); }
+.credit .sep { opacity: 0.25; }
+@media (max-width: 520px) { .credit .sep { display: none; } }
 
 /* ---------- Weapons + scope ---------- */
 #crosshair.hide { opacity: 0; }
